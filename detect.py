@@ -23,8 +23,10 @@ Usage - formats:
                                          yolov5s.tflite             # TensorFlow Lite
                                          yolov5s_edgetpu.tflite     # TensorFlow Edge TPU
 """
+# cd yolov5
+# Usage:
 # Mac
-# Usage: python detect.py --weights ../weights/bestv2.pt --img 416 --conf 0.5 --source "../data/2022-11-20.png" --ocr True --geocoding True
+# python detect.py --weights ../weights/bestv2.pt --img 416 --conf 0.5 --source "../data/2022-11-20.png" --ocr True --geocoding True
 # Windows
 # Usage: python detect.py --weights ..\weights\bestv2.pt --img 416 --conf 0.5 --source "..\data\2022-11-20.png" --ocr True --geocoding True
 import argparse
