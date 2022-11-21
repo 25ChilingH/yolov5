@@ -23,7 +23,10 @@ Usage - formats:
                                          yolov5s.tflite             # TensorFlow Lite
                                          yolov5s_edgetpu.tflite     # TensorFlow Edge TPU
 """
-
+# Mac
+# Usage: python detect.py --weights ../weights/bestv2.pt --img 416 --conf 0.5 --source "../data/2022-11-20.png" --ocr True --geocoding True
+# Windows
+# Usage: python detect.py --weights ..\weights\bestv2.pt --img 416 --conf 0.5 --source "..\data\2022-11-20.png" --ocr True --geocoding True
 import argparse
 import os
 import sys
@@ -44,7 +47,7 @@ from utils.general import (LOGGER, check_file, check_img_size, check_imshow, che
                            increment_path, non_max_suppression, print_args, scale_coords, strip_optimizer, xyxy2xywh)
 from utils.plots import Annotator, colors, save_one_box
 from utils.torch_utils import select_device, time_sync
-
+from functions import giveText, geocodeIntersection
 
 @torch.no_grad()
 def run(
@@ -74,6 +77,8 @@ def run(
         hide_conf=False,  # hide confidences
         half=False,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
+        ocr=False,
+        geocoding=False,
 ):
     source = str(source)
     save_img = not nosave and not source.endswith('.txt')  # save inference images
@@ -210,6 +215,15 @@ def run(
         LOGGER.info(f"Results saved to {colorstr('bold', save_dir)}{s}")
     if update:
         strip_optimizer(weights)  # update model (to fix SourceChangeWarning)
+    if ocr:
+        pred = pred[0].tolist()
+        streets = giveText(pred, im0)
+        print(streets)
+        if geocoding:
+            if (len(streets) == 2):
+                print(geocodeIntersection(streets))
+            else:
+                LOGGER.info("Not enough streets detected")
 
 
 def parse_opt():
@@ -240,6 +254,8 @@ def parse_opt():
     parser.add_argument('--hide-conf', default=False, action='store_true', help='hide confidences')
     parser.add_argument('--half', action='store_true', help='use FP16 half-precision inference')
     parser.add_argument('--dnn', action='store_true', help='use OpenCV DNN for ONNX inference')
+    parser.add_argument('--ocr', default=False, help="use optical character recognition")
+    parser.add_argument('--geocoding', default=False, help="use geocoding to find long and lat coordinates")
     opt = parser.parse_args()
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
     print_args(vars(opt))
