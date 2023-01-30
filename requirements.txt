@@ -2,16 +2,24 @@
 # Usage: pip install -r requirements.txt
 
 # Base ----------------------------------------
-# matplotlib>=3.2.2
-numpy>=1.18.5
-opencv-python>=3.4.2
-opencv-contrib-python>=3.4.2
+matplotlib>=2.1.1
+# numpy>=1.18.5
+# opencv-python>=3.4.2
+# opencv-contrib-python>=3.4.2
 Pillow>=7.1.2
 PyYAML>=5.3.1
 requests>=2.23.0
+
+# Before installing scipy ----------------------
+# sudo apt install libblas3 liblapack3 liblapack-dev libblas-dev
+# sudo apt install gfortran
+# sudo apt install libatlas-base-dev
 scipy>=1.4.1
-torch>=1.7.0
-torchvision>=0.8.1
+
+# Instead, download https://github.com/ultralytics/yolov5/issues/9627
+# torch>=1.7.0
+# torchvision>=0.8.1
+
 tqdm>=4.64.0
 protobuf<4.21.3  # https://github.com/ultralytics/yolov5/issues/8012
 
