@@ -2,6 +2,7 @@ import easyocr
 import cv2
 from geopy.geocoders import ArcGIS
 
+skip = ['bike', 'hwy', 'highway', 'to'] # substrings of skipped words
 def giveText(imgpred, image):
     reader = easyocr.Reader(['en'])
     conf_thresh = 0.2
@@ -45,8 +46,14 @@ def giveText(imgpred, image):
             for detection in result: 
                 if detection[2] > conf_thresh:
                     text = detection[1]
+                    textList = []
+                    for x in text.split():
+                        textList.append(''.join(filter(str.isalnum, x)))
+                    text = ' '.join(textList)
                     street += text + " "
-            streets.append(''.join(item for item in street.rstrip(" ") if item.isalnum()))
+            street = street[:-1].lower()
+            if not any(s in street for s in skip):
+                streets.append(street)
     # cv2.destroyAllWindows()
     return streets
 
