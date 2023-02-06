@@ -30,7 +30,7 @@ Usage - formats:
 # Windows
 # python detect.py --weights ..\weights\bestv2.pt --img 416 --conf 0.5 --source "..\data\2022-11-20.png" --ocr True --geocoding True
 # Nano
-# python3 detect.py --weights ..\weights\bestv2.pt --img 720 --conf 0.5 --source 0 --ocr True --geocoding True
+# python3 detect.py --weights ../weights/bestv2.pt --img 720 --conf 0.5 --source 0 --ocr True --geocoding True
 import argparse
 import os
 import sys
