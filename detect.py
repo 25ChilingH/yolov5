@@ -28,7 +28,9 @@ Usage - formats:
 # Mac
 # python detect.py --weights ../weights/bestv2.pt --img 416 --conf 0.5 --source "../data/2022-11-20.png" --ocr True --geocoding True
 # Windows
-# Usage: python detect.py --weights ..\weights\bestv2.pt --img 416 --conf 0.5 --source "..\data\2022-11-20.png" --ocr True --geocoding True
+# python detect.py --weights ..\weights\bestv2.pt --img 416 --conf 0.5 --source "..\data\2022-11-20.png" --ocr True --geocoding True
+# Nano
+# python3 detect.py --weights ..\weights\bestv2.pt --conf 0.5 --source 0 --device 0 --ocr True --geocoding True
 import argparse
 import os
 import sys
@@ -161,6 +163,16 @@ def run(
                 for c in det[:, -1].unique():
                     n = (det[:, -1] == c).sum()  # detections per class
                     s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
+
+                if ocr:
+                    pred = pred[0].tolist()
+                    streets = giveText(pred, im0)
+                    print(streets)
+                    if geocoding:
+                        if (len(streets) == 2):
+                            print(geocodeIntersection(streets))
+                        else:
+                            LOGGER.info("Not enough streets detected")
 
                 # Write results
                 for *xyxy, conf, cls in reversed(det):

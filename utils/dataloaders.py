@@ -326,7 +326,7 @@ class LoadStreams:
             if s == 0:
                 assert not is_colab(), '--source 0 webcam unsupported on Colab. Rerun command in a local environment.'
                 assert not is_kaggle(), '--source 0 webcam unsupported on Kaggle. Rerun command in a local environment.'
-            cap = cv2.VideoCapture(self._gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
+            cap = cv2.VideoCapture(self._gstreamer_pipeline(flip_method=1), cv2.CAP_GSTREAMER)
             assert cap.isOpened(), f'{st}Failed to open {s}'
             w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
             h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -390,8 +390,8 @@ class LoadStreams:
         self,
         capture_width=1280,
         capture_height=720,
-        display_width=1280,
-        display_height=720,
+        display_width=960,
+        display_height=540,
         framerate=60,
         flip_method=0,
     ):
