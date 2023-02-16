@@ -26,7 +26,7 @@ def giveText(imgpred, image):
         # making sure there is readable text
         height = bottom - top
         width = right - left
-        print(height, width)
+        print("Height: %d, Width: %d"%(height, width))
 
         # ocr
         if height >= minHeight and width >= minWidth:
