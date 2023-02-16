@@ -3,8 +3,8 @@ import cv2
 from geopy.geocoders import ArcGIS
 
 skip = ['bike', 'hwy', 'highway', 'to'] # substrings of skipped words
+reader = easyocr.Reader(['en'])
 def giveText(imgpred, image):
-    reader = easyocr.Reader(['en'], gpu=True)
     conf_thresh = 0.2
     minHeight = 20
     minWidth = 70

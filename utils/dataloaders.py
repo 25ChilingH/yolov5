@@ -388,11 +388,11 @@ class LoadStreams:
 
     def _gstreamer_pipeline(
         self,
-        capture_width=1280,
-        capture_height=720,
-        display_width=960,
-        display_height=540,
-        framerate=60,
+        capture_width=416,
+        capture_height=416,
+        display_width=416,
+        display_height=416,
+        framerate=30,
         flip_method=0,
     ):
         return (

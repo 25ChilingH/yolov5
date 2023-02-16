@@ -30,7 +30,7 @@ Usage - formats:
 # Windows
 # python detect.py --weights ..\weights\bestv2.pt --img 416 --conf 0.5 --source "..\data\2022-11-20.png" --ocr True --geocoding True
 # Nano
-# python3 detect.py --weights ../weights/bestv2.pt --img 416 --conf 0.5 --source 0 --device 0 --ocr True --geocoding True
+# python3 detect.py --weights ../weights/bestv3.pt --img 416 --conf 0.3 --source 0 --device 0 --ocr True --geocoding True
 import argparse
 import os
 import sys
@@ -209,11 +209,10 @@ def run(
                     vid_writer[i].write(im0)
 
         if ocr:
-            pred = pred[0].tolist()
-            streets = giveText(pred, im0)
-            LOGGER.info(streets)
+            streets = giveText(pred[0].tolist(), im0)
+            print(streets)
             if geocoding:
-                if (len(streets) == 2):
+                if len(streets) == 2:
                     print(geocodeIntersection(streets))
                 else:
                     LOGGER.info("Not enough streets detected")
