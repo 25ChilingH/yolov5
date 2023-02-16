@@ -30,7 +30,7 @@ Usage - formats:
 # Windows
 # python detect.py --weights ..\weights\bestv2.pt --img 416 --conf 0.5 --source "..\data\2022-11-20.png" --ocr True --geocoding True
 # Nano
-# python3 detect.py --weights ../weights/bestv2.pt --img 720 --conf 0.5 --source 0 --ocr True --geocoding True
+# python3 detect.py --weights ../weights/bestv2.pt --img 416 --conf 0.5 --source 0 --device 0 --ocr True --geocoding True
 import argparse
 import os
 import sys
@@ -164,16 +164,6 @@ def run(
                     n = (det[:, -1] == c).sum()  # detections per class
                     s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
 
-                if ocr:
-                    pred = pred[0].tolist()
-                    streets = giveText(pred, im0)
-                    print(streets)
-                    if geocoding:
-                        if (len(streets) == 2):
-                            print(geocodeIntersection(streets))
-                        else:
-                            LOGGER.info("Not enough streets detected")
-
                 # Write results
                 for *xyxy, conf, cls in reversed(det):
                     if save_txt:  # Write to file
@@ -218,6 +208,15 @@ def run(
                         vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
                     vid_writer[i].write(im0)
 
+        if ocr:
+            pred = pred[0].tolist()
+            streets = giveText(pred, im0)
+            LOGGER.info(streets)
+            if geocoding:
+                if (len(streets) == 2):
+                    print(geocodeIntersection(streets))
+                else:
+                    LOGGER.info("Not enough streets detected")
         # Print time (inference-only)
         LOGGER.info(f'{s}Done. ({t3 - t2:.3f}s)')
 
@@ -229,15 +228,6 @@ def run(
         LOGGER.info(f"Results saved to {colorstr('bold', save_dir)}{s}")
     if update:
         strip_optimizer(weights)  # update model (to fix SourceChangeWarning)
-    if ocr:
-        pred = pred[0].tolist()
-        streets = giveText(pred, im0)
-        print(streets)
-        if geocoding:
-            if (len(streets) == 2):
-                print(geocodeIntersection(streets))
-            else:
-                LOGGER.info("Not enough streets detected")
 
 
 def parse_opt():

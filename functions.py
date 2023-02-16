@@ -4,7 +4,7 @@ from geopy.geocoders import ArcGIS
 
 skip = ['bike', 'hwy', 'highway', 'to'] # substrings of skipped words
 def giveText(imgpred, image):
-    reader = easyocr.Reader(['en'])
+    reader = easyocr.Reader(['en'], gpu=True)
     conf_thresh = 0.2
     minHeight = 20
     minWidth = 70
