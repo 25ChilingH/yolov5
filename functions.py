@@ -59,14 +59,14 @@ def geocodeIntersection(streets, state="California", country="USA", threshold=5)
     if streets[1][1] - streets[0][1] <= threshold:
         param = "{} and {}, {}, {}".format(streets[0][0], streets[1][0], state, country)
         location = geolocator.geocode(param)
-        return (location.latitude, location.longitude)
+        return (location.latitude, location.longitude)        
     return "No intersection found"
 
 # field of view of camera in degs
 hfov = 62.2
 vfov = 48.8
 # display size
-resolution = (1280, 720)
+resolution = (416, 416)
 def angleToSign(pred):
 
     center = (resolution[0]/2, resolution[1]/2)
@@ -90,7 +90,7 @@ f = 3.04
 # real height of a street sign in mm = 6 inches
 real_height = 152.4
 # image height in pixels
-image_height = 720
+image_height = 416
 # camera/sensor height in mm
 sensor_height = 23
 def distance(pred):

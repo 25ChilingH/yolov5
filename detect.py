@@ -209,15 +209,15 @@ def run(
                         vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
                     vid_writer[i].write(im0)
         imgpreds = pred[0].tolist()
-        print(len(imgpreds[0]))
         if ocr and imgpreds:
             streets = giveText(imgpreds, im0)
+            if len(streets) > 2:
+                streets.clear()
             print(streets)
             if geocoding:
                 if type(streets) != str and len(streets) >= 2:
                     lat, long = geocodeIntersection(streets)
                     print((lat, long))
-                    streets.pop(0)
                     if offset:
                         x, y = xy_translation(angleToSign(imgpreds[0])[0], distance(imgpreds[0]))
                         print("FINAL coordinates:", translate_latlong(y, -x))
