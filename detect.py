@@ -26,9 +26,9 @@ Usage - formats:
 # cd yolov5
 # Usage:
 # Mac
-# python detect.py --weights ../weights/bestv2.pt --img 416 --conf 0.5 --source "../data/2022-11-20.png" --ocr True --geocoding True
+# python detect.py --weights ../weights/bestv3.pt --img 416 --conf 0.5 --source "../data/2022-11-20.png" --ocr True --geocoding True
 # Windows
-# python detect.py --weights ..\weights\bestv2.pt --img 416 --conf 0.5 --source "..\data\2022-11-20.png" --ocr True --geocoding True
+# python detect.py --weights ..\weights\bestv3.pt --img 416 --conf 0.5 --source "..\data\2022-11-20.png" --ocr True --geocoding True
 # Nano
 # python3 detect.py --weights ../weights/bestv3.pt --img 416 --conf 0.3 --source 0 --device 0 --ocr True --geocoding True
 import argparse
