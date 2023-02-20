@@ -208,11 +208,12 @@ def run(
                         vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
                     vid_writer[i].write(im0)
         imgpreds = pred[0].tolist()
+        streets = []
         if ocr and imgpreds:
             streets = giveText(imgpreds, im0)
             print(streets)
         if geocoding:
-            if len(streets) >= 2:
+            if type(streets) != str and len(streets) >= 2:
                 print(geocodeIntersection(streets, threshold=5))
                 streets.pop(0)
             else:
