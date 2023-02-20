@@ -1,6 +1,7 @@
 import easyocr
 import cv2
 from geopy.geocoders import ArcGIS
+from utils.torch_utils import time_sync
 
 skip = ['bike', 'hwy', 'highway', 'to', 'exit'] # substrings of skipped words
 reader = easyocr.Reader(['en'])
@@ -28,32 +29,39 @@ def giveText(imgpred, image):
         width = right - left
         print("Height: %d, Width: %d"%(height, width))
 
-        # ocr
-        if height >= minHeight and width >= minWidth:
-            cropped_image = image[round(top):round(bottom), round(left):round(right)]
-            # grayscale region within bounding box
-            gray = cv2.cvtColor(cropped_image, cv2.COLOR_RGB2GRAY)
-            # threshold the image using Otsus method to preprocess for tesseract
-            thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
-            # perform a median blur to smooth image slightly
-            blur = cv2.medianBlur(thresh, 3)
-            # resize image to double the original size as tesseract does better with certain text size
-            blur = cv2.resize(blur, None, fx = 2, fy = 2, interpolation = cv2.INTER_CUBIC)
-            # cv2.imshow('', blur)
-            # cv2.waitKey(0)
-            result = reader.readtext(blur)
-            street = ""
-            for detection in result: 
-                if detection[2] > conf_thresh:
-                    text = detection[1]
-                    textList = []
-                    for x in text.split():
-                        textList.append(''.join(filter(str.isalnum, x)))
-                    text = ' '.join(textList)
-                    street += text + " "
-            street = street[:-1].lower()
-            if not any(s in street for s in skip):
-                streets.append(street)
+        try:
+            t1 = time_sync()
+            # ocr
+            if height >= minHeight and width >= minWidth:
+                cropped_image = image[round(top):round(bottom), round(left):round(right)]
+                # grayscale region within bounding box
+                gray = cv2.cvtColor(cropped_image, cv2.COLOR_RGB2GRAY)
+                # threshold the image using Otsus method to preprocess for tesseract
+                thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
+                # perform a median blur to smooth image slightly
+                blur = cv2.medianBlur(thresh, 3)
+                # resize image to double the original size as tesseract does better with certain text size
+                blur = cv2.resize(blur, None, fx = 2, fy = 2, interpolation = cv2.INTER_CUBIC)
+                # cv2.imshow('', blur)
+                # cv2.waitKey(0)
+                t2 = time_sync()
+                result = reader.readtext(blur)
+                t3 = time_sync()
+                street = ""
+                for detection in result: 
+                    if detection[2] > conf_thresh:
+                        text = detection[1]
+                        textList = []
+                        for x in text.split():
+                            textList.append(''.join(filter(str.isalnum, x)))
+                        text = ' '.join(textList)
+                        street += text + " "
+                street = street[:-1].lower()
+                if not any(s in street for s in skip):
+                    streets.append(street)
+            print(f"Reader time: {t3-t2}, Preprocessing time: {t2-t1}")
+        except:
+            return "Could not read text"
     # cv2.destroyAllWindows()
     return streets
 
