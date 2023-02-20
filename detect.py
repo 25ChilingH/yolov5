@@ -101,6 +101,7 @@ def run(
     model = DetectMultiBackend(weights, device=device, dnn=dnn, data=data, fp16=half)
     stride, names, pt = model.stride, model.names, model.pt
     imgsz = check_img_size(imgsz, s=stride)  # check image size
+    streets = []
 
     # Dataloader
     if webcam:
@@ -208,7 +209,6 @@ def run(
                         vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
                     vid_writer[i].write(im0)
         imgpreds = pred[0].tolist()
-        streets = []
         if ocr and imgpreds:
             streets = giveText(imgpreds, im0)
             print(streets)
