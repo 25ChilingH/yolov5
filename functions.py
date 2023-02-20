@@ -39,15 +39,15 @@ def giveText(imgpred, image):
                 blur = cv2.medianBlur(thresh, 3)
                 # resize image to double the original size as tesseract does better with certain text size
                 blur = cv2.resize(blur, None, fx = 2, fy = 2, interpolation = cv2.INTER_CUBIC)
-                cv2.imshow('', blur)
-                cv2.waitKey(0)
+                # cv2.imshow('', blur)
+                # cv2.waitKey(0)
                 result = reader.readtext(blur, blocklist="hwybikehighwaytoexit-.:';,[]()*&^%$#@!?/{}", detail=0, paragraph=True)
                 if result:
                     result = result[0].lower()
                     streets.append([result, time.time()])
         except:
             return "Unable to detect text"
-    cv2.destroyAllWindows()
+    # cv2.destroyAllWindows()
     return streets
 
 def geocodeIntersection(streets, state="California", country="USA", threshold=5):
