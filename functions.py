@@ -2,14 +2,15 @@ import easyocr
 import cv2
 from geopy.geocoders import ArcGIS
 from utils.torch_utils import time_sync
+import time
 
-skip = ['bike', 'hwy', 'highway', 'to', 'exit'] # substrings of skipped words
 reader = easyocr.Reader(['en'])
+geolocator = ArcGIS()
+streets = []
 def giveText(imgpred, image):
     conf_thresh = 0.2
     minHeight = 20
     minWidth = 70
-    streets = []
     for pred in imgpred:
         left = pred[0] # centery-height + h_padding
         top = pred[1] # centerx-width + w_padding
@@ -45,28 +46,19 @@ def giveText(imgpred, image):
                 # cv2.imshow('', blur)
                 # cv2.waitKey(0)
                 t2 = time_sync()
-                result = reader.readtext(blur)
+                result = reader.readtext(blur, batch_size=5, blocklist="hwybikehighwaytoexit-.:';,", detail=0, paragraph=True)
                 t3 = time_sync()
-                street = ""
-                for detection in result: 
-                    if detection[2] > conf_thresh:
-                        text = detection[1]
-                        textList = []
-                        for x in text.split():
-                            textList.append(''.join(filter(str.isalnum, x)))
-                        text = ' '.join(textList)
-                        street += text + " "
-                street = street[:-1].lower()
-                if not any(s in street for s in skip):
-                    streets.append(street)
+                result = result[0].lower()
+                streets.append([result, time.time()])
             print(f"Reader time: {t3-t2}, Preprocessing time: {t2-t1}")
         except:
             return "Could not read text"
     # cv2.destroyAllWindows()
     return streets
 
-def geocodeIntersection(streets, state="California", country="USA"):
-    geolocator = ArcGIS()
-    param = "{} and {}, {}, {}".format(streets[0], streets[1], state, country)
-    location = geolocator.geocode(param)
-    return (location.latitude, location.longitude)
+def geocodeIntersection(streets, state="California", country="USA", threshold=5):
+    if streets[1][1] - streets[0][1] <= threshold:
+        param = "{} and {}, {}, {}".format(streets[0][0], streets[1][0], state, country)
+        location = geolocator.geocode(param)
+        return (location.latitude, location.longitude)
+    return "Not enough streets detected"

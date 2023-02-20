@@ -211,11 +211,12 @@ def run(
         if ocr and imgpreds:
             streets = giveText(imgpreds, im0)
             print(streets)
-            if geocoding:
-                if len(streets) == 2:
-                    print(geocodeIntersection(streets))
-                else:
-                    LOGGER.info("Not enough streets detected")
+        if geocoding:
+            if len(streets) >= 2:
+                print(geocodeIntersection(streets, threshold=5))
+                streets.pop(0)
+            else:
+                print("Not enough streets detected")
         # Print time (inference-only)
         LOGGER.info(f'{s}Done. ({t3 - t2:.3f}s)')
 
