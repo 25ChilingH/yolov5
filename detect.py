@@ -51,7 +51,7 @@ from utils.general import (LOGGER, check_file, check_img_size, check_imshow, che
                            increment_path, non_max_suppression, print_args, scale_coords, strip_optimizer, xyxy2xywh)
 from utils.plots import Annotator, colors, save_one_box
 from utils.torch_utils import select_device, time_sync
-from functions import giveText, geocodeIntersection
+from functions import giveText, geocodeIntersection, translate_latlong, xy_translation, distance, angleToSign
 
 @torch.no_grad()
 def run(
@@ -83,6 +83,7 @@ def run(
         dnn=False,  # use OpenCV DNN for ONNX inference
         ocr=False,
         geocoding=False,
+        offset=False
 ):
     source = str(source)
     save_img = not nosave and not source.endswith('.txt')  # save inference images
@@ -101,7 +102,6 @@ def run(
     model = DetectMultiBackend(weights, device=device, dnn=dnn, data=data, fp16=half)
     stride, names, pt = model.stride, model.names, model.pt
     imgsz = check_img_size(imgsz, s=stride)  # check image size
-    streets = []
 
     # Dataloader
     if webcam:
@@ -209,15 +209,21 @@ def run(
                         vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
                     vid_writer[i].write(im0)
         imgpreds = pred[0].tolist()
+        print(len(imgpreds[0]))
         if ocr and imgpreds:
             streets = giveText(imgpreds, im0)
             print(streets)
-        if geocoding:
-            if type(streets) != str and len(streets) >= 2:
-                print(geocodeIntersection(streets, threshold=5))
-                streets.pop(0)
-            else:
-                print("Not enough streets detected")
+            if geocoding:
+                if type(streets) != str and len(streets) >= 2:
+                    lat, long = geocodeIntersection(streets)
+                    print((lat, long))
+                    streets.pop(0)
+                    if offset:
+                        x, y = xy_translation(angleToSign(imgpreds[0])[0], distance(imgpreds[0]))
+                        print("FINAL coordinates:", translate_latlong(y, -x))
+                else:
+                    print("Not enough streets detected")
+
         # Print time (inference-only)
         LOGGER.info(f'{s}Done. ({t3 - t2:.3f}s)')
 
@@ -260,7 +266,8 @@ def parse_opt():
     parser.add_argument('--half', action='store_true', help='use FP16 half-precision inference')
     parser.add_argument('--dnn', action='store_true', help='use OpenCV DNN for ONNX inference')
     parser.add_argument('--ocr', default=False, help="use optical character recognition")
-    parser.add_argument('--geocoding', default=False, help="use geocoding to find long and lat coordinates")
+    parser.add_argument('--geocoding', default=False, help="use geocoding to find the street sign's long and lat coordinates")
+    parser.add_argument('--offset', default=False, help="use offset to find the translated long and lat coordinates")
     opt = parser.parse_args()
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
     print_args(vars(opt))
