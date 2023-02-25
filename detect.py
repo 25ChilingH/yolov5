@@ -51,7 +51,7 @@ from utils.general import (LOGGER, check_file, check_img_size, check_imshow, che
                            increment_path, non_max_suppression, print_args, scale_coords, strip_optimizer, xyxy2xywh)
 from utils.plots import Annotator, colors, save_one_box
 from utils.torch_utils import select_device, time_sync
-from functions import giveText, geocodeIntersection
+from functions import giveText, geocodeIntersection, readGPS
 
 @torch.no_grad()
 def run(
@@ -81,9 +81,10 @@ def run(
         hide_conf=False,  # hide confidences
         half=False,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
-        ocr=False,
-        geocoding=False,
-        log_txt=False
+        ocr=True,
+        geocoding=True,
+        log_txt=True,
+        gps_module=True
 ):
     source = str(source)
     save_img = not nosave and not source.endswith('.txt')  # save inference images
@@ -227,7 +228,15 @@ def run(
                             f.write(line + '\n')
                 else:
                     print("Not enough streets detected")
-
+        if gps_module:
+            if log_txt:
+                line = readGPS()
+                if line[0] != None and line[1] != None:
+                    line = str(line)
+                    with open(f'{log_path}.txt', 'a') as f:
+                        f.write(line + '\n')
+                else:
+                    print("GPS module cannot read data")
         # Print time (inference-only)
         LOGGER.info(f'{s}Done. ({t3 - t2:.3f}s)')
 
@@ -269,9 +278,10 @@ def parse_opt():
     parser.add_argument('--hide-conf', default=False, action='store_true', help='hide confidences')
     parser.add_argument('--half', action='store_true', help='use FP16 half-precision inference')
     parser.add_argument('--dnn', action='store_true', help='use OpenCV DNN for ONNX inference')
-    parser.add_argument('--ocr', default=False, help="use optical character recognition")
-    parser.add_argument('--geocoding', default=False, help="use geocoding to find the street sign's long and lat coordinates")
-    parser.add_argument('--log-txt', default=False, help="log geopositioning data into a txt file")
+    parser.add_argument('--ocr', default=True, help="use optical character recognition")
+    parser.add_argument('--geocoding', default=True, help="use geocoding to find the street sign's long and lat coordinates")
+    parser.add_argument('--log-txt', default=True, help="log geopositioning data into a txt file")
+    parser.add_argument('--gps', default=True, help="enable the GPS module readings")
     opt = parser.parse_args()
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
     print_args(vars(opt))

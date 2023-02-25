@@ -3,11 +3,13 @@ import cv2
 from geopy.geocoders import ArcGIS
 import time
 import math
+import gps
 
 reader = easyocr.Reader(['en'])
 geolocator = ArcGIS()
 streets = []
 skip = ['bike', 'hwy', 'highway', 'to', 'exit']
+session = gps.gps(mode=gps.WATCH_ENABLE)
 def giveText(imgpred, image):
     minHeight = len(image) * 0.02
     minWidth = len(image[0]) * 0.03
@@ -62,6 +64,19 @@ def geocodeIntersection(streets, state="California", country="USA", threshold=5)
         return (location.latitude, location.longitude)        
     return "No intersection found"
 
+def readGPS():
+    coords = (None, None)
+    counter = 0
+    while 0 == session.read():
+        if gps.isfinite(session.fix.latitude) and session.fix.latitude > 0.000000001 and coords[0]==None:
+            coords[0] = session.fix.latitude
+        if gps.isfinite(session.fix.longitude) and session.fix.longitude > 0.000000001 and coords[1]==None:
+            coords[1] = session.fix.longitude
+        if coords[0] != None and coords[1] != None or counter > 10:
+            break
+        counter += 1
+    return coords
+        
 # focal length in mm
 f = 3.04
 # real height of a street sign in mm = 6 inches
