@@ -26,11 +26,11 @@ Usage - formats:
 # cd yolov5
 # Usage:
 # Mac
-# python detect.py --weights ../weights/bestv3.pt --img 416 --conf 0.5 --source "../data/2022-11-20.png" --ocr True --geocoding True
+# python3 detect.py --weights ../weights/bestv3.pt --img 416 --conf 0.5 --source "../data/2022-11-20.png" --ocr True --geocoding True
 # Windows
 # python detect.py --weights ..\weights\bestv3.pt --img 416 --conf 0.5 --source "..\data\2022-11-20.png" --ocr True --geocoding True
 # Nano
-# python3 detect.py --weights ../weights/bestv3.pt --img 416 --conf 0.3 --source 0 --device 0 --ocr True --geocoding True
+# python3 detect.py --weights ../weights/bestv3.pt --img 416 --conf 0.3 --source 0 --device 0 --ocr True --geocoding True --log-txt True
 import argparse
 import os
 import sys
@@ -51,7 +51,7 @@ from utils.general import (LOGGER, check_file, check_img_size, check_imshow, che
                            increment_path, non_max_suppression, print_args, scale_coords, strip_optimizer, xyxy2xywh)
 from utils.plots import Annotator, colors, save_one_box
 from utils.torch_utils import select_device, time_sync
-from functions import giveText, geocodeIntersection, translate_latlong, xy_translation, distance, angleToSign
+from functions import giveText, geocodeIntersection
 
 @torch.no_grad()
 def run(
@@ -83,7 +83,7 @@ def run(
         dnn=False,  # use OpenCV DNN for ONNX inference
         ocr=False,
         geocoding=False,
-        offset=False
+        log_txt=False
 ):
     source = str(source)
     save_img = not nosave and not source.endswith('.txt')  # save inference images
@@ -113,6 +113,9 @@ def run(
         dataset = LoadImages(source, img_size=imgsz, stride=stride, auto=pt)
         bs = 1  # batch_size
     vid_path, vid_writer = [None] * bs, [None] * bs
+
+    if log_txt:
+        log_path = f'{save_dir}/' + ('logs')
 
     # Run inference
     model.warmup(imgsz=(1 if pt else bs, 3, *imgsz))  # warmup
@@ -145,9 +148,11 @@ def run(
             seen += 1
             if webcam:  # batch_size >= 1
                 p, im0, frame = path[i], im0s[i].copy(), dataset.count
+                img = im0.copy()
                 s += f'{i}: '
             else:
                 p, im0, frame = path, im0s.copy(), getattr(dataset, 'frame', 0)
+                img = im0.copy()
 
             p = Path(p)  # to Path
             save_path = str(save_dir / p.name)  # im.jpg
@@ -210,17 +215,16 @@ def run(
                     vid_writer[i].write(im0)
         imgpreds = pred[0].tolist()
         if ocr and imgpreds:
-            streets = giveText(imgpreds, im0)
-            if len(streets) > 2:
+            streets = giveText(imgpreds, img)
+            if type(streets) != str and len(streets) > 2:
                 streets.clear()
-            print(streets)
             if geocoding:
                 if type(streets) != str and len(streets) >= 2:
                     lat, long = geocodeIntersection(streets)
-                    print((lat, long))
-                    if offset:
-                        x, y = xy_translation(angleToSign(imgpreds[0])[0], distance(imgpreds[0]))
-                        print("FINAL coordinates:", translate_latlong(y, -x))
+                    if log_txt:
+                        line = f'{streets[0][0]} {streets[1][0]},{lat},{long}'
+                        with open(f'{log_path}.txt', 'a') as f:
+                            f.write(line + '\n')
                 else:
                     print("Not enough streets detected")
 
@@ -267,7 +271,7 @@ def parse_opt():
     parser.add_argument('--dnn', action='store_true', help='use OpenCV DNN for ONNX inference')
     parser.add_argument('--ocr', default=False, help="use optical character recognition")
     parser.add_argument('--geocoding', default=False, help="use geocoding to find the street sign's long and lat coordinates")
-    parser.add_argument('--offset', default=False, help="use offset to find the translated long and lat coordinates")
+    parser.add_argument('--log-txt', default=False, help="log geopositioning data into a txt file")
     opt = parser.parse_args()
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
     print_args(vars(opt))

@@ -38,14 +38,14 @@ def giveText(imgpred, image):
                 # grayscale region within bounding box
                 gray = cv2.cvtColor(cropped_image, cv2.COLOR_RGB2GRAY)
                 # threshold the image using Otsus method to preprocess for tesseract
-                thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+                thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
                 # perform a median blur to smooth image slightly
                 blur = cv2.medianBlur(thresh, 3)
                 # resize image to double the original size as tesseract does better with certain text size
                 blur = cv2.resize(blur, None, fx = 2, fy = 2, interpolation = cv2.INTER_CUBIC)
                 # cv2.imshow('', blur)
                 # cv2.waitKey(0)
-                result = reader.readtext(blur, blocklist="-.:';,[]()*&^%$#@!?/{}", detail=0, paragraph=True)
+                result = reader.readtext(blur, allowlist="abcdefghijklmnopqrstuvwxyz", detail=0, paragraph=True)
                 if result:
                     result = result[0].lower()
                     if not any(s in result for s in skip):
@@ -62,29 +62,6 @@ def geocodeIntersection(streets, state="California", country="USA", threshold=5)
         return (location.latitude, location.longitude)        
     return "No intersection found"
 
-# field of view of camera in degs
-hfov = 62.2
-vfov = 48.8
-# display size
-resolution = (416, 416)
-def angleToSign(pred):
-
-    center = (resolution[0]/2, resolution[1]/2)
-
-    left = int(pred[0]) # centery-height + h_padding
-    top = int(pred[1]) # centerx-width + w_padding
-    right = int(pred[2]) # centery+height - h_padding
-    bottom = int(pred[3]) # centerx+width - w_padding 
-    
-    # center of bounding box
-    center_pixel = ((left + right) / 2, (top + bottom) / 2)
-
-    # angle to center pixel in X and Y directions
-    angle_x = (center_pixel[0] - center[0]) / resolution[0] * hfov
-    angle_y = (center_pixel[1] - center[1]) / resolution[1] * vfov
-
-    return angle_x, angle_y
-
 # focal length in mm
 f = 3.04
 # real height of a street sign in mm = 6 inches
@@ -97,11 +74,6 @@ def distance(pred):
     # object height in pixels
     object_height = pred[3]-pred[1]
     return (f * real_height * image_height)/(object_height * sensor_height)
-
-
-def xy_translation(angle_x, distance):
-    return math.sin(math.radians(angle_x)) * distance / 1000.0, math.cos(math.radians(angle_x)) * distance / 1000.0
-
 
 def translate_latlong(lat,long,lat_translation_meters,long_translation_meters):
     ''' method to move any lat,long point by provided meters in lat and long direction.
