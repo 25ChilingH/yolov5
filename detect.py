@@ -232,7 +232,7 @@ def run(
             if log_txt:
                 line = readGPS()
                 if line[0] != None and line[1] != None:
-                    line = str(line)
+                    line = str(line[0]) + "," + str(line[1])
                     with open(f'{log_path}.txt', 'a') as f:
                         f.write(line + '\n')
                 else:

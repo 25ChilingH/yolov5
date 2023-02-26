@@ -65,7 +65,7 @@ def geocodeIntersection(streets, state="California", country="USA", threshold=5)
     return "No intersection found"
 
 def readGPS():
-    coords = (None, None)
+    coords = [None, None]
     counter = 0
     while 0 == session.read():
         if gps.isfinite(session.fix.latitude) and session.fix.latitude > 0.000000001 and coords[0]==None:
