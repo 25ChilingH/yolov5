@@ -51,7 +51,7 @@ from utils.general import (LOGGER, check_file, check_img_size, check_imshow, che
                            increment_path, non_max_suppression, print_args, scale_coords, strip_optimizer, xyxy2xywh)
 from utils.plots import Annotator, colors, save_one_box
 from utils.torch_utils import select_device, time_sync
-from functions import giveText, geocodeIntersection, readGPS
+import functions
 
 @torch.no_grad()
 def run(
@@ -216,21 +216,21 @@ def run(
                     vid_writer[i].write(im0)
         imgpreds = pred[0].tolist()
         if ocr and imgpreds:
-            streets = giveText(imgpreds, img)
+            streets = functions.giveText(imgpreds, img)
             if type(streets) != str and len(streets) > 2:
                 streets.clear()
             if geocoding:
                 if type(streets) != str and len(streets) >= 2:
-                    lat, long = geocodeIntersection(streets)
+                    lat, long = functions.geocodeIntersection(streets)
                     if log_txt:
                         line = f'{streets[0][0]} {streets[1][0]},{lat},{long}'
                         with open(f'{log_path}.txt', 'a') as f:
                             f.write(line + '\n')
                 else:
                     print("Not enough streets detected")
-        if gps:
+        if gps and not functions.flag:
             if log_txt:
-                line = readGPS()
+                line = functions.readGPS()
                 if line[0] != None and line[1] != None:
                     line = str(line[0]) + "," + str(line[1])
                     with open(f'{log_path}.txt', 'a') as f:
