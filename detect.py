@@ -84,7 +84,7 @@ def run(
         ocr=True,
         geocoding=True,
         log_txt=True,
-        gps_module=True
+        gps=True
 ):
     source = str(source)
     save_img = not nosave and not source.endswith('.txt')  # save inference images
@@ -228,7 +228,7 @@ def run(
                             f.write(line + '\n')
                 else:
                     print("Not enough streets detected")
-        if gps_module:
+        if gps:
             if log_txt:
                 line = readGPS()
                 if line[0] != None and line[1] != None:
