@@ -9,7 +9,10 @@ reader = easyocr.Reader(['en'])
 geolocator = ArcGIS()
 streets = []
 skip = ['bike', 'hwy', 'highway', 'to', 'exit']
-session = gps.gps(mode=gps.WATCH_ENABLE)
+try:
+    session = gps.gps(mode=gps.WATCH_ENABLE)
+except:
+    print("GPS not available")
 def giveText(imgpred, image):
     minHeight = len(image) * 0.02
     minWidth = len(image[0]) * 0.03
