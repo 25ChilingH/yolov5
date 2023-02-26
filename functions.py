@@ -47,7 +47,7 @@ def giveText(imgpred, image):
                 blur = cv2.resize(blur, None, fx = 2, fy = 2, interpolation = cv2.INTER_CUBIC)
                 # cv2.imshow('', blur)
                 # cv2.waitKey(0)
-                result = reader.readtext(blur, allowlist="abcdefghijklmnopqrstuvwxyz", detail=0, paragraph=True)
+                result = reader.readtext(blur, allowlist="abcdefghijklmnopqrstuvwxyz0123456789", detail=0, paragraph=True)
                 if result:
                     result = result[0].lower()
                     if not any(s in result for s in skip):
