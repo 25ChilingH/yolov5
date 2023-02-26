@@ -66,15 +66,14 @@ def geocodeIntersection(streets, state="California", country="USA", threshold=5)
 
 def readGPS():
     coords = [None, None]
-    counter = 0
+    start = time.time()
     while 0 == session.read():
         if gps.isfinite(session.fix.latitude) and session.fix.latitude > 0.000000001 and coords[0]==None:
             coords[0] = session.fix.latitude
         if gps.isfinite(session.fix.longitude) and session.fix.longitude > 0.000000001 and coords[1]==None:
             coords[1] = session.fix.longitude
-        if coords[0] != None and coords[1] != None or counter > 10:
+        if coords[0] != None and coords[1] != None or time.time() - start >= 10:
             break
-        counter += 1
     return coords
         
 # focal length in mm

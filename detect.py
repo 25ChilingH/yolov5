@@ -84,7 +84,7 @@ def run(
         ocr=True,
         geocoding=True,
         log_txt=True,
-        gps=True
+        gps=False
 ):
     source = str(source)
     save_img = not nosave and not source.endswith('.txt')  # save inference images
@@ -281,7 +281,7 @@ def parse_opt():
     parser.add_argument('--ocr', default=True, help="use optical character recognition")
     parser.add_argument('--geocoding', default=True, help="use geocoding to find the street sign's long and lat coordinates")
     parser.add_argument('--log-txt', default=True, help="log geopositioning data into a txt file")
-    parser.add_argument('--gps', default=True, help="enable the GPS module readings")
+    parser.add_argument('--gps', default=False, help="enable the GPS module readings")
     opt = parser.parse_args()
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
     print_args(vars(opt))
