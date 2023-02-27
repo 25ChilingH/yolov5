@@ -69,15 +69,19 @@ def geocodeIntersection(streets, state="California", country="USA", threshold=5)
         return (location.latitude, location.longitude)        
     return "No intersection found"
 
-def readGPS():
-    coords = [None, None]
-    start = time.time()
+def readGPS(line):
+    coords = [None, None, time.time()]
+    if line != -1:
+        if coords[2] - line[2] < 60:
+            return coords
     while 0 == session.read():
-        if gps.isfinite(session.fix.latitude) and session.fix.latitude > 0.000000001 and coords[0]==None:
+        if not (gps.MODE_SET & session.valid):
+            continue
+        if gps.isfinite(session.fix.latitude) and coords[0]==None:
             coords[0] = session.fix.latitude
-        if gps.isfinite(session.fix.longitude) and session.fix.longitude > 0.000000001 and coords[1]==None:
+        if gps.isfinite(session.fix.longitude) and coords[1]==None:
             coords[1] = session.fix.longitude
-        if coords[0] != None and coords[1] != None or time.time() - start >= 1:
+        if coords[0] != None and coords[1] != None or time.time() - coords[2] > 1:
             break
     return coords
         

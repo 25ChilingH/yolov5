@@ -103,6 +103,7 @@ def run(
     model = DetectMultiBackend(weights, device=device, dnn=dnn, data=data, fp16=half)
     stride, names, pt = model.stride, model.names, model.pt
     imgsz = check_img_size(imgsz, s=stride)  # check image size
+    line = -1
 
     # Dataloader
     if webcam:
@@ -117,7 +118,7 @@ def run(
 
     if log_txt:
         log_path = f'{save_dir}/' + ('logs')
-
+    
     # Run inference
     model.warmup(imgsz=(1 if pt else bs, 3, *imgsz))  # warmup
     seen, windows, dt = 0, [], [0.0, 0.0, 0.0]
@@ -223,21 +224,20 @@ def run(
                 if type(streets) != str and len(streets) >= 2:
                     lat, long = functions.geocodeIntersection(streets)
                     if log_txt:
-                        line = f'{streets[0][0]} {streets[1][0]},{lat},{long}'
+                        s = f'{streets[0][0]} {streets[1][0]},{lat},{long}'
                         with open(f'{log_path}.txt', 'a') as f:
-                            f.write(line + '\n')
+                            f.write(s + '\n')
                 else:
                     print("Not enough streets detected")
-        if gps and not functions.flag:
-            if log_txt:
-                line = functions.readGPS()
-                if line[0] != None and line[1] != None:
-                    line = str(line[0]) + "," + str(line[1])
-                    with open(f'{log_path}.txt', 'a') as f:
-                        f.write(line + '\n')
-                else:
-                    print("GPS module cannot read data")
         # Print time (inference-only)
+        if gps and not functions.flag:
+            line = functions.readGPS(line)
+            if line[0] != None and line[1] != None:
+                line = str(line[0]) + "," + str(line[1])
+                with open(f'{log_path}.txt', 'a') as f:
+                    f.write(line + '\n')
+            else:
+                print("GPS module cannot read data")
         LOGGER.info(f'{s}Done. ({t3 - t2:.3f}s)')
 
     # Print results
