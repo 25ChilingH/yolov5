@@ -14,47 +14,44 @@ skip = ['bike', 'hwy', 'highway', 'to', 'exit']
 def giveText(imgpred, image):
     minHeight = len(image) * 0.02
     minWidth = len(image[0]) * 0.03
-    for pred in imgpred:
-        left = pred[0] # centery-height + h_padding
-        top = pred[1] # centerx-width + w_padding
-        right = pred[2] # centery+height - h_padding
-        bottom = pred[3] # centerx+width - w_padding
+    left = imgpred[0][0] # centery-height + h_padding
+    top = imgpred[0][1] # centerx-width + w_padding
+    right = imgpred[0][2] # centery+height - h_padding
+    bottom = imgpred[0][3] # centerx+width - w_padding
         
-        # padding
-        widthPadding = (right - left) * 0.1
-        heightPadding = (bottom - top) * 0.05
-        left -= widthPadding
-        right += widthPadding
-        bottom += heightPadding
-        top -= heightPadding
+    # padding
+    widthPadding = (right - left) * 0.1
+    heightPadding = (bottom - top) * 0.05
+    left -= widthPadding
+    right += widthPadding
+    bottom += heightPadding
+    top -= heightPadding
 
-        # making sure there is readable text
-        height = bottom - top
-        width = right - left
-        # cv2.imshow('', image)
-        # cv2.waitKey(0)
-        print("Height: %d, Width: %d"%(height, width))
-        try:
-            # ocr
-            if height >= minHeight and width >= minWidth:
-                cropped_image = image[round(top):round(bottom), round(left):round(right)]
-                # grayscale region within bounding box
-                gray = cv2.cvtColor(cropped_image, cv2.COLOR_RGB2GRAY)
-                # threshold the image using Otsus method to preprocess for tesseract
-                thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
-                # perform a median blur to smooth image slightly
-                blur = cv2.medianBlur(thresh, 3)
-                # resize image to double the original size as tesseract does better with certain text size
-                blur = cv2.resize(blur, None, fx = 2, fy = 2, interpolation = cv2.INTER_CUBIC)
-                # cv2.imshow('', blur)
-                # cv2.waitKey(0)
-                result = reader.readtext(blur, allowlist="abcdefghijklmnopqrstuvwxyz0123456789", detail=0, paragraph=True)
-                if result:
-                    result = result[0].lower()
-                    if not any(s in result for s in skip):
-                        streets.append([result, time.time()])
-        except:
-            return "Unable to detect text"
+    # making sure there is readable text
+    height = bottom - top
+    width = right - left
+    # cv2.imshow('', image)
+    # cv2.waitKey(0)
+    print("Height: %d, Width: %d"%(height, width))
+    try:
+        # ocr
+        if height >= minHeight and width >= minWidth:
+            cropped_image = image[round(top):round(bottom), round(left):round(right)]
+            # grayscale region within bounding box
+            gray = cv2.cvtColor(cropped_image, cv2.COLOR_RGB2GRAY)
+            # threshold the image using Otsus method to preprocess for tesseract
+            thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
+            # perform a median blur to smooth image slightly
+            blur = cv2.medianBlur(thresh, 3)
+            # cv2.imshow('', blur)
+            # cv2.waitKey(0)
+            result = reader.readtext(blur, allowlist="abcdefghijklmnopqrstuvwxyz0123456789", detail=0, paragraph=True)
+            if result:
+                result = result[0]
+                if not any(s in result for s in skip):
+                    streets.append([result, time.time()])
+    except:
+        return "Unable to detect text"
     # cv2.destroyAllWindows()
     return streets
 

@@ -61,7 +61,7 @@ def run(
         imgsz=(640, 640),  # inference size (height, width)
         conf_thres=0.25,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
-        max_det=2,  # maximum detections per image
+        max_det=1,  # maximum detections per image
         device='',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
         view_img=False,  # show results
         save_txt=False,  # save results to *.txt
@@ -221,7 +221,7 @@ def run(
             if type(streets) != str and len(streets) > 2:
                 streets.clear()
             if geocoding:
-                if type(streets) != str and len(streets) >= 2:
+                if type(streets) != str and len(streets) == 2:
                     lat, long = functions.geocodeIntersection(streets)
                     if log_txt:
                         s = f'{streets[0][0]} {streets[1][0]},{lat},{long}'
