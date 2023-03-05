@@ -105,6 +105,8 @@ def run(
     imgsz = check_img_size(imgsz, s=stride)  # check image size
     line = -1
 
+    if ocr:
+        streets = []
     # Dataloader
     if webcam:
         view_img = check_imshow()
@@ -217,13 +219,16 @@ def run(
                     vid_writer[i].write(im0)
         imgpreds = pred[0].tolist()
         if ocr and imgpreds:
-            streets = functions.giveText(imgpreds, img)
-            if type(streets) != str and len(streets) > 2:
-                streets.clear()
+            street = functions.giveText(imgpreds, img)
+            print(street)
+            if type(streets) != str:
+                streets.append(street)
+            if len(streets) > 2:
+                streets = streets[1:]
             if geocoding:
                 if type(streets) != str and len(streets) == 2:
                     latlong = functions.geocodeIntersection(streets)
-                    if log_txt:
+                    if type(latlong) != str and log_txt:
                         s = f'{streets[0][0]} {streets[1][0]},{latlong[0]},{latlong[1]}'
                         with open(f'{log_path}.txt', 'a') as f:
                             f.write(s + '\n')
@@ -253,7 +258,7 @@ def parse_opt():
     parser.add_argument('--imgsz', '--img', '--img-size', nargs='+', type=int, default=[640], help='inference size h,w')
     parser.add_argument('--conf-thres', type=float, default=0.25, help='confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.45, help='NMS IoU threshold')
-    parser.add_argument('--max-det', type=int, default=2, help='maximum detections per image')
+    parser.add_argument('--max-det', type=int, default=1, help='maximum detections per image')
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--view-img', action='store_true', help='show results')
     parser.add_argument('--save-txt', action='store_true', help='save results to *.txt')

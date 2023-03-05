@@ -2,14 +2,12 @@ import easyocr
 import cv2
 from geopy.geocoders import ArcGIS
 import time
-import math
-# import pynmea2
-# import serial
-# from datetime import datetime
+import pynmea2
+import serial
+from datetime import datetime
 
 reader = easyocr.Reader(['en'])
 geolocator = ArcGIS()
-streets = []
 skip = ['bike', 'hwy', 'highway', 'to', 'exit']
 def giveText(imgpred, image):
     minHeight = len(image) * 0.02
@@ -38,7 +36,7 @@ def giveText(imgpred, image):
         if height >= minHeight and width >= minWidth:
             cropped_image = image[round(top):round(bottom), round(left):round(right)]
             # grayscale region within bounding box
-            gray = cv2.cvtColor(cropped_image, cv2.COLOR_RGB2GRAY)
+            gray = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2GRAY)
             # threshold the image using Otsus method to preprocess for tesseract
             thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
             # perform a median blur to smooth image slightly
@@ -46,18 +44,16 @@ def giveText(imgpred, image):
             blur = cv2.resize(blur, None, fx = 2, fy = 2, interpolation = cv2.INTER_CUBIC)
             # cv2.imshow('', blur)
             # cv2.waitKey(0)
-            result = reader.readtext(blur, allowlist="abcdefghijklmnopqrstuvwxyz0123456789", detail=0, paragraph=True)
+            result = reader.readtext(blur, gpu=True, allowlist="abcdefghijklmnopqrstuvwxyz0123456789", detail=0, paragraph=True)
             if result:
                 result = result[0]
-                if not any(s in result for s in skip):
-                    streets.append([result, time.time()])
+                return [result, time.time()]
     except:
         return "Unable to detect text"
     # cv2.destroyAllWindows()
-    return streets
 
-def geocodeIntersection(streets, state="California", country="USA", threshold=20):
-    if threshold // 4 <= streets[1][1] - streets[0][1] <= threshold:
+def geocodeIntersection(streets, state="California", country="USA", threshold=10):
+    if streets[1][1] - streets[0][1] <= threshold:
         param = "{} and {}, {}, {}".format(streets[0][0], streets[1][0], state, country)
         try:
             location = geolocator.geocode(param)
@@ -66,39 +62,39 @@ def geocodeIntersection(streets, state="California", country="USA", threshold=20
         return (location.latitude, location.longitude)        
     return "No intersection found"
 
-# def readGPS(latitude, longitude, path):
-#     COM_PORT = "/dev/ttyTHS1"
-#     BAUDRATE = 9600
+def readGPS(latitude, longitude, path):
+    COM_PORT = "/dev/ttyTHS1"
+    BAUDRATE = 9600
 
-#     print("Running get_lat_lon function")
-#     f = open(path, "a")
+    print("Running get_lat_lon function")
+    f = open(path, "a")
 
-#     serial_port = serial.Serial(COM_PORT, BAUDRATE, timeout = None)
+    serial_port = serial.Serial(COM_PORT, BAUDRATE, timeout = None)
 
-#     # Wait until GPS is released
-#     pipe = True
-#     while pipe:
-#         pipe = serial_port.inWaiting()
-#         serial_port.read(pipe)
+    # Wait until GPS is released
+    pipe = True
+    while pipe:
+        pipe = serial_port.inWaiting()
+        serial_port.read(pipe)
 
-#     try:
-#         while True:
-#             line = serial_port.readline()
-#             line2 = line.decode('latin-1')
+    try:
+        while True:
+            line = serial_port.readline()
+            line2 = line.decode('latin-1')
 
-#             if line2.startswith("$GNGGA"):
-#                 msg = pynmea2.parse(line2.strip())
+            if line2.startswith("$GNGGA"):
+                msg = pynmea2.parse(line2.strip())
                 
-#                 latitude.value, longitude.value = msg.latitude, msg.longitude
-#                 if latitude.value != 0 or longitude.value != 0:
-#                     f.write(f"{datetime.now().strftime('%Y:%m:%d:%H:%M:%S')} {msg.timestamp} {str(latitude.value)} {str(longitude.value)} \n")
-#                     serial_port.close()
-#                     f.flush()
-#                     break
-#             else:
-#                 pass
-#     except:
-#         print("GPS not available")
+                latitude.value, longitude.value = msg.latitude, msg.longitude
+                if latitude.value != 0 or longitude.value != 0:
+                    f.write(f"{datetime.now().strftime('%Y:%m:%d:%H:%M:%S')} {msg.timestamp} {str(latitude.value)} {str(longitude.value)} \n")
+                    serial_port.close()
+                    f.flush()
+                    break
+            else:
+                pass
+    except:
+        print("GPS not available")
         
 # # focal length in mm
 # f = 3.04
