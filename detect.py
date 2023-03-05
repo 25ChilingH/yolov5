@@ -234,7 +234,7 @@ def run(
         if gps:
             latitude = multiprocessing.Value('d', 1.0)
             longitude = multiprocessing.Value('d', 1.0)
-            gps_thread = multiprocessing.Process(target = functions.get_lat_lon, args=(latitude, longitude, "{log_path}.txt"))
+            gps_thread = multiprocessing.Process(target = functions.readGPS, args=(latitude, longitude, "{log_path}.txt"))
             gps_thread.start()
         # Print time (inference-only)
         LOGGER.info(f'{s}Done. ({t3 - t2:.3f}s)')
