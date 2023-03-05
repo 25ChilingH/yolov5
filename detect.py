@@ -222,9 +222,9 @@ def run(
                 streets.clear()
             if geocoding:
                 if type(streets) != str and len(streets) == 2:
-                    lat, long = functions.geocodeIntersection(streets)
+                    latlong = functions.geocodeIntersection(streets)
                     if log_txt:
-                        s = f'{streets[0][0]} {streets[1][0]},{lat},{long}'
+                        s = f'{streets[0][0]} {streets[1][0]},{latlong[0]},{latlong[1]}'
                         with open(f'{log_path}.txt', 'a') as f:
                             f.write(s + '\n')
                 else:
