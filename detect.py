@@ -52,6 +52,7 @@ from utils.general import (LOGGER, check_file, check_img_size, check_imshow, che
 from utils.plots import Annotator, colors, save_one_box
 from utils.torch_utils import select_device, time_sync
 import functions
+import multiprocessing
 
 @torch.no_grad()
 def run(
@@ -229,15 +230,13 @@ def run(
                             f.write(s + '\n')
                 else:
                     print("Not enough streets detected")
+        
+        if gps:
+            latitude = multiprocessing.Value('d', 1.0)
+            longitude = multiprocessing.Value('d', 1.0)
+            gps_thread = multiprocessing.Process(target = functions.get_lat_lon, args=(latitude, longitude, "{log_path}.txt"))
+            gps_thread.start()
         # Print time (inference-only)
-        if gps and not functions.flag:
-            line = functions.readGPS(line)
-            if line[0] != None and line[1] != None:
-                line = str(line[0]) + "," + str(line[1])
-                with open(f'{log_path}.txt', 'a') as f:
-                    f.write(line + '\n')
-            else:
-                print("GPS module cannot read data")
         LOGGER.info(f'{s}Done. ({t3 - t2:.3f}s)')
 
     # Print results

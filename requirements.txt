@@ -49,6 +49,8 @@ thop>=0.1.1  # FLOPs computation
 easyocr # need to uninstall opencv-python-headless
 geopy
 gps
+pynmea2
+serial
 # albumentations>=1.0.3
 # pycocotools>=2.0  # COCO mAP
 # roboflow

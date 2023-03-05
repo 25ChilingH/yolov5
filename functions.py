@@ -3,18 +3,14 @@ import cv2
 from geopy.geocoders import ArcGIS
 import time
 import math
-import gps
+import pynmea2
+import serial
+from datetime import datetime
 
 reader = easyocr.Reader(['en'])
 geolocator = ArcGIS()
 streets = []
 skip = ['bike', 'hwy', 'highway', 'to', 'exit']
-flag = False
-try:
-    session = gps.gps(mode=gps.WATCH_ENABLE)
-except:
-    print("GPS not available")
-    flag = True
 def giveText(imgpred, image):
     minHeight = len(image) * 0.02
     minWidth = len(image[0]) * 0.03
@@ -69,21 +65,39 @@ def geocodeIntersection(streets, state="California", country="USA", threshold=5)
         return (location.latitude, location.longitude)        
     return "No intersection found"
 
-def readGPS(line):
-    coords = [None, None, time.time()]
-    if line != -1:
-        if coords[2] - line[2] < 60:
-            return coords
-    while 0 == session.read():
-        if not (gps.MODE_SET & session.valid):
-            continue
-        if gps.isfinite(session.fix.latitude) and coords[0]==None:
-            coords[0] = session.fix.latitude
-        if gps.isfinite(session.fix.longitude) and coords[1]==None:
-            coords[1] = session.fix.longitude
-        if coords[0] != None and coords[1] != None or time.time() - coords[2] > 1:
-            break
-    return coords
+def readGPS(latitude, longitude, path):
+    COM_PORT = "/dev/ttyTHS1"
+    BAUDRATE = 9600
+
+    print("Running get_lat_lon function")
+    f = open(path, "a")
+
+    serial_port = serial.Serial(COM_PORT, BAUDRATE, timeout = None)
+
+    # Wait until GPS is released
+    pipe = True
+    while pipe:
+        pipe = serial_port.inWaiting()
+        serial_port.read(pipe)
+
+    try:
+        while True:
+            line = serial_port.readline()
+            line2 = line.decode('latin-1')
+
+            if line2.startswith("$GNGGA"):
+                msg = pynmea2.parse(line2.strip())
+                
+                latitude.value, longitude.value = msg.latitude, msg.longitude
+                if latitude.value != 0 or longitude.value != 0:
+                    f.write(f"{datetime.now().strftime('%Y:%m:%d:%H:%M:%S')} {msg.timestamp} {str(latitude.value)} {str(longitude.value)} \n")
+                    serial_port.close()
+                    f.flush()
+                    break
+            else:
+                pass
+    except:
+        print("GPS not available")
         
 # focal length in mm
 f = 3.04
