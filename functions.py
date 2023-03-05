@@ -43,6 +43,7 @@ def giveText(imgpred, image):
             thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
             # perform a median blur to smooth image slightly
             blur = cv2.medianBlur(thresh, 3)
+            blur = cv2.resize(blur, None, fx = 2, fy = 2, interpolation = cv2.INTER_CUBIC)
             # cv2.imshow('', blur)
             # cv2.waitKey(0)
             result = reader.readtext(blur, allowlist="abcdefghijklmnopqrstuvwxyz0123456789", detail=0, paragraph=True)
@@ -55,8 +56,8 @@ def giveText(imgpred, image):
     # cv2.destroyAllWindows()
     return streets
 
-def geocodeIntersection(streets, state="California", country="USA", threshold=5):
-    if streets[1][1] - streets[0][1] <= threshold:
+def geocodeIntersection(streets, state="California", country="USA", threshold=20):
+    if threshold // 4 <= streets[1][1] - streets[0][1] <= threshold:
         param = "{} and {}, {}, {}".format(streets[0][0], streets[1][0], state, country)
         try:
             location = geolocator.geocode(param)
