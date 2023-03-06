@@ -352,6 +352,9 @@ class LoadStreams:
         while cap.isOpened() and n < f:
             n += 1
             # _, self.imgs[index] = cap.read()
+            key = cv2.waitKey(1)
+            if key == 27:
+                break
             cap.grab()
             if n % read == 0:
                 success, im = cap.retrieve()
@@ -404,7 +407,6 @@ class LoadStreams:
             f"video/x-raw, width=(int){display_width}, height=(int){display_height}, format=(string)BGRx ! "
             "videoconvert ! "
             "video/x-raw, format=(string)BGR ! appsink"
-            "wait-on-eos=false drop=true max-buffers=60 -e -vvv"
         )
 
     def __len__(self):
