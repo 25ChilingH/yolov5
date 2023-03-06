@@ -404,6 +404,7 @@ class LoadStreams:
             f"video/x-raw, width=(int){display_width}, height=(int){display_height}, format=(string)BGRx ! "
             "videoconvert ! "
             "video/x-raw, format=(string)BGR ! appsink"
+            "wait-on-eos=false drop=true max-buffers=60 -e -vvv"
         )
 
     def __len__(self):
