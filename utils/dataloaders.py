@@ -352,8 +352,7 @@ class LoadStreams:
         while cap.isOpened() and n < f:
             n += 1
             # _, self.imgs[index] = cap.read()
-            key = cv2.waitKey(1)
-            if key == 27:
+            if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
             cap.grab()
             if n % read == 0:
@@ -365,6 +364,8 @@ class LoadStreams:
                     self.imgs[i] = np.zeros_like(self.imgs[i])
                     cap.open(stream)  # re-open stream if signal was lost
             time.sleep(0.0)  # wait time
+        cap.release()
+        cv2.destroyAllWindows()
 
     def __iter__(self):
         self.count = -1
