@@ -277,7 +277,7 @@ def parse_opt():
     parser.add_argument('--ocr', default=False, help="use optical character recognition")
     parser.add_argument('--geocoding', default=False, help="use geocoding to find the street sign's long and lat coordinates")
     parser.add_argument('--log-txt', default=False, help="log geopositioning data into a txt file")
-    parser.add_argument('--gps', default=True, help="enable the GPS module readings")
+    parser.add_argument('--gps', default=False, help="enable the GPS module readings")
     opt = parser.parse_args()
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
     print_args(vars(opt))
