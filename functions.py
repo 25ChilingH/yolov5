@@ -45,10 +45,9 @@ def giveText(imgpred, image):
             blur = cv2.resize(blur, None, fx = 2, fy = 2, interpolation = cv2.INTER_CUBIC)
             # cv2.imshow('', blur)
             # cv2.waitKey(0)
-            result = reader.readtext(blur, allowlist="abcdefghijklmnopqrstuvwxyz0123456789", detail=0, paragraph=True)
+            result = reader.recognize(blur, allowlist="abcdefghijklmnopqrstuvwxyz0123456789", detail=0, paragraph=True)
             if result:
-                result = result[0]
-                streets.append([result, time.time()])
+                streets.append([result[0], time.time()])
     except:
         return "Unable to detect text"
     return streets
