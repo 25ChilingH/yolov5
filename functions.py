@@ -8,6 +8,7 @@ from datetime import datetime
 
 reader = easyocr.Reader(['en'])
 geolocator = ArcGIS()
+streets = []
 skip = ['bike', 'hwy', 'highway', 'to', 'exit']
 def giveText(imgpred, image):
     minHeight = len(image) * 0.02
@@ -44,12 +45,13 @@ def giveText(imgpred, image):
             blur = cv2.resize(blur, None, fx = 2, fy = 2, interpolation = cv2.INTER_CUBIC)
             # cv2.imshow('', blur)
             # cv2.waitKey(0)
-            result = reader.readtext(blur, gpu=True, allowlist="abcdefghijklmnopqrstuvwxyz0123456789", detail=0, paragraph=True)
+            result = reader.readtext(blur, allowlist="abcdefghijklmnopqrstuvwxyz0123456789", detail=0, paragraph=True)
             if result:
                 result = result[0]
-                return [result, time.time()]
+                streets.append([result, time.time()])
     except:
         return "Unable to detect text"
+    return streets
     # cv2.destroyAllWindows()
 
 def geocodeIntersection(streets, state="California", country="USA", threshold=10):

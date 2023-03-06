@@ -105,8 +105,6 @@ def run(
     imgsz = check_img_size(imgsz, s=stride)  # check image size
     line = -1
 
-    if ocr:
-        streets = []
     # Dataloader
     if webcam:
         view_img = check_imshow()
@@ -219,17 +217,15 @@ def run(
                     vid_writer[i].write(im0)
         imgpreds = pred[0].tolist()
         if ocr and imgpreds:
-            street = functions.giveText(imgpreds, img)
-            print(street)
-            if type(streets) != str:
-                streets.append(street)
-            if len(streets) > 2:
-                streets = streets[1:]
+            streets = functions.giveText(imgpreds, img)
+            print(streets)
+            if type(streets) != str and len(streets) > 2:
+                streets = streets.clear()
             if geocoding:
                 if type(streets) != str and len(streets) == 2:
                     latlong = functions.geocodeIntersection(streets)
                     if type(latlong) != str and log_txt:
-                        s = f'{streets[0][0]} {streets[1][0]},{latlong[0]},{latlong[1]}'
+                        s = f'{streets[0][0]} and {streets[1][0]}, {latlong[0]}, {latlong[1]}'
                         with open(f'{log_path}.txt', 'a') as f:
                             f.write(s + '\n')
                 else:
