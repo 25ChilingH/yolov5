@@ -301,6 +301,7 @@ class LoadWebcam:  # for inference
 class LoadStreams:
     # YOLOv5 streamloader, i.e. `python detect.py --source 'rtsp://example.com/media.mp4'  # RTSP, RTMP, HTTP streams`
     def __init__(self, sources='streams.txt', img_size=640, stride=32, auto=True):
+        global cap
         self.mode = 'stream'
         self.img_size = img_size
         self.stride = stride
@@ -364,6 +365,10 @@ class LoadStreams:
                     self.imgs[i] = np.zeros_like(self.imgs[i])
                     cap.open(stream)  # re-open stream if signal was lost
             time.sleep(0.0)  # wait time
+        cap.release()
+        cv2.destroyAllWindows()
+
+    def stop(self):
         cap.release()
         cv2.destroyAllWindows()
 

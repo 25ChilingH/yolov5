@@ -104,6 +104,7 @@ def run(
     stride, names, pt = model.stride, model.names, model.pt
     imgsz = check_img_size(imgsz, s=stride)  # check image size
     line = -1
+    noCrops = 0
 
     # Dataloader
     if webcam:
@@ -186,6 +187,7 @@ def run(
                         annotator.box_label(xyxy, label, color=colors(c, True))
                     if save_crop:
                         save_one_box(xyxy, imc, file=save_dir / 'crops' / names[c] / f'{p.stem}.jpg', BGR=True)
+                        noCrops += 1
 
             # Stream results
             im0 = annotator.result()
@@ -233,6 +235,8 @@ def run(
         
         if gps:
             functions.readGPS(0.0, 0.0, f"{log_path}.txt")
+        if noCrops > 120:
+            LoadStreams.stop(LoadStreams.__class__)
         # Print time (inference-only)
         LOGGER.info(f'{s}Done. ({t3 - t2:.3f}s)')
 
